@@ -12,9 +12,10 @@ app.use(bodyParser.json());
 app.use(function(req, res, next){
     console.log('첫번째 미들웨어 호출됨.');
 
-    var paramName = req.body.name || req.query.name;
+    var userAgent = req.header('User-Agent');
+    var paramId = req.body.id || req.query.id;
 
-    res.send(paramName);
+    res.send(paramId);
 });
 
 var server = http.createServer(app);
