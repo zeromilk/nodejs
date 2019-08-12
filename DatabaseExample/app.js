@@ -16,11 +16,11 @@ var MongoClient = require('mongodb').MongoClient;
 
 var database;
 
+//mongo db 커넥션 함수
 function connectDB(){
     var databaseUrl = 'mongodb://localhost:27017';
 
     MongoClient.connect(databaseUrl, {useNewUrlParser:true}, function(err, client){
-            
         if(err){ console.log('db연결시 에러 발생함'); return; }
         
         console.log('db연결됨 : ' +databaseUrl);
