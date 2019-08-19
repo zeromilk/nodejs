@@ -30,13 +30,28 @@ function connectDB(){
         console.log('데이터베이스에 연결됨 : ' + databaseUrl);
 
         UserSchema = mongoose.Schema({
-            id: String,
-            name: String,
-            password: String
+            id: {'type':String, required:true, unique:true},
+            password: {'type':String, required:true},
+            name: {'type':String, index:'hashed'},
+            age: {'type':Number, 'default':-1},
+            created_at: {'type':Date, index:{unique:false}, default:Date.now()},
+            updated_at: {'type':Date, index:{unique:false}, default:Date.now()}
         });
         console.log('UserSchema 정의함.');
 
-        UserModel = mongoose.model('Users', UserSchema);
+        UserSchema.static('findById', function(id, callback){
+            return this.find({id:id, callback});
+        });
+
+        /* UserSchema.statics.findById = function(id, callback){
+            return this.find({id:id, callback});
+        }; */
+
+        UserSchema.static('findAll', function(callback){
+            return this.find({}, callback);
+        });
+
+        UserModel = mongoose.model('users2', UserSchema);
         console.log('UserModel 정의함.');
     });
 
@@ -153,17 +168,23 @@ app.use('/', router);
 var authUser = function(db, id, password, callback){
     console.log('authUser 호출됨 : ' + id + ', ' + password);
 
-    UserModel.find({'id':id, 'password':password}, function(err, docs){
+    UserModel.findById(id, function(err, docs){
         if(err) {
             callback(err, null);
             return;
         }
 
+        console.log('아이디 %s로 검색됨');
         if(docs.length > 0) {
-            console.log('일치하는 사용자를 찾음');
-            callback(null, docs);
+            if(docs[0]._doc.password === password){
+                console.log('비밀번호 일치함.');
+                callback(null, docs);
+            }else{
+                console.log('비밀번호 일치하지 않음.');
+                callback(null, null);
+            }            
         }else{
-            console.log('일치하는 사용자를 찾지 못함.');
+            console.log('아이디 일치하는 사용자 없음.');
             callback(null, null);
         }
     });
